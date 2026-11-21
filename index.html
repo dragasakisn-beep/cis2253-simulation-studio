@@ -178,6 +178,7 @@ progress::-moz-progress-bar { background: var(--progress-fill); border-radius: v
 .work-column, aside { display: grid; gap: 16px; align-content: start; min-width: 0; }
 .panel { padding: 16px; }
 .activity { padding: 24px; box-shadow: var(--shadow); }
+.release-panel { max-width: 560px; }
 .panel h2 { margin-bottom: 8px; }
 .activity > .eyebrow { margin-bottom: 8px; }
 #activity > p + p { margin-top: 8px; }
@@ -536,6 +537,7 @@ const caseStoryboards = [
 'use strict';
 
 const storageKey = 'cis2253-studio-v1';
+const releaseHashes = {"1":"d85412c756ca837df31efd34be585d419167318d4980a2ec37795afaded7db54","2":"5463352f1894e0377ace100d543038800955da75b0657abed6e8251ae83208fc","3":"96b45c5ea4556cbf5a1c7fe651dd29cc4e22f7b064c28ea933a9c28cd082ba58","4":"fba03e62656821dc24cba4ada6b72b914c28ee5da1edce3c03551ed8440e01e7","5":"2883a692acbe27508ce0d14d447453733bc5a9774118a4e1d1f0eeb8554645ca","6":"3a84d1c8f3aa9b90f5c4b44fb46147ded968c6786731054c5525ca5d8d10bc9c","7":"509e0dc5fbb10f5bac6c4c26757f3cfb07bf846ed3510c3537ed5f24a7ac5595"};
 const stages = ['Briefing · 5 min', 'Investigation · 10 min', 'Decision path · 15 min', 'Ethical analysis · 15 min', 'Reflection and report · 10 min'];
 const frameworks = [
   'Consequences — compare likely benefits, harms, and their distribution.',
@@ -629,6 +631,67 @@ function nextLab() {
   return cases.findIndex((_, id) => !state.runs[id]?.completed);
 }
 
+function needsReleaseCode(id) {
+  return Boolean(releaseHashes[id] && state.releases?.[id] !== releaseHashes[id]);
+}
+
+function startLab(id) {
+  if (state.runs[id]?.completed) {
+    report(id);
+    return;
+  }
+  if (id !== nextLab()) return;
+  if (needsReleaseCode(id)) {
+    showReleaseForm(id);
+    return;
+  }
+  if (!state.runs[id]) {
+    state.runs[id] = {stage:0, started:new Date().toISOString(), seen:{}, drafts:{}, audit:[]};
+    save();
+  }
+  open(id);
+}
+
+function showReleaseForm(id) {
+  show(`<div class="no-print"><div class="case-heading"><button class="text-link" id="back">All scenarios</button>
+    <p class="eyebrow">Week ${Math.floor(id / 2) + 1} · Lab ${id + 1}</p>
+    <h1>${cases[id].title}</h1></div>
+    <section class="panel activity release-panel"><h2>Waiting for instructor code</h2>
+      <p>Enter the release code your instructor gives you for this lab.</p>
+      <form id="release-form">
+        <label class="field">Lab release code<input name="code" type="text" maxlength="64" autocomplete="off" spellcheck="false" required></label>
+        <p class="error" id="release-error" role="alert"></p>
+        <button class="btn" type="submit">Unlock lab</button>
+      </form>
+    </section></div>`);
+  document.querySelector('#back').onclick = home;
+  const form = document.querySelector('#release-form');
+  form.onsubmit = async event => {
+    event.preventDefault();
+    const error = document.querySelector('#release-error');
+    const input = form.elements.code;
+    const key = input.value.replace(/[\s-]/g, '').toUpperCase();
+    let digest;
+    try {
+      digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key));
+    } catch {
+      error.textContent = 'This browser cannot verify the code. Open the Studio using the HTTPS course link.';
+      return;
+    }
+    if (!form.isConnected || id !== nextLab()) return;
+    const hash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+    if (hash !== releaseHashes[id]) {
+      error.textContent = 'That code does not unlock this lab. Check the code from your instructor.';
+      input.focus();
+      return;
+    }
+    state.releases ??= {};
+    state.releases[id] = hash;
+    save();
+    startLab(id);
+  };
+}
+
 function labResources() {
   return `<section class="panel hero-resources" aria-labelledby="lab-resources">
     <h2 id="lab-resources">Government and Industry Resources</h2>
@@ -657,9 +720,9 @@ function home() {
       <a href="#course-reference">Textbook reference</a></div>
   </div>${labResources()}</div>
   <section class="featured" aria-labelledby="featured-title"><div>
-    <p class="eyebrow">${next < 0 ? 'Latest lab in the course' : active ? 'In progress' : 'Up next'} · Week ${Math.floor(featured / 2) + 1}</p>
+    <p class="eyebrow">${next < 0 ? 'Latest lab in the course' : needsReleaseCode(next) ? 'Waiting for instructor code' : active ? 'In progress' : 'Up next'} · Week ${Math.floor(featured / 2) + 1}</p>
     <h2 id="featured-title">${cases[featured].title}</h2><p class="muted">${cases[featured].topic}</p>
-    <div class="actions"><button class="btn" data-featured="${featured}">${next < 0 ? 'View capstone report' : active ? 'Resume lab' : 'Start lab'}</button>
+    <div class="actions"><button class="btn" data-featured="${featured}">${next < 0 ? 'View capstone report' : needsReleaseCode(next) ? 'Enter release code' : active ? 'Resume lab' : 'Start lab'}</button>
     <a href="#scenario-library">Browse scenarios</a></div>
     </div><div class="progress-summary"><p class="eyebrow">Your progress</p>
     <p class="progress-count">${completed}<span> / ${cases.length}</span></p>
@@ -674,9 +737,10 @@ function home() {
       const run = state.runs[id];
       const {done, total} = moduleProgress(scenario, run);
       const locked = !run?.completed && id !== next;
-      const label = run?.completed ? 'View report' : run ? 'Resume scenario' : 'Open scenario';
+      const waiting = !locked && !run?.completed && needsReleaseCode(id);
+      const label = run?.completed ? 'View report' : waiting ? 'Enter release code' : run ? 'Resume scenario' : 'Open scenario';
       return `<article class="card">${caseScene(id, 0, true)}
-      <p class="eyebrow">Lab ${id + 1} · ${locked ? 'Locked' : run?.completed ? 'Complete' : run ? 'In progress' : 'Ready to start'}</p>
+      <p class="eyebrow">Lab ${id + 1} · ${locked ? 'Locked' : run?.completed ? 'Complete' : waiting ? 'Waiting for instructor code' : run ? 'In progress' : 'Ready to start'}</p>
       <h4>${scenario.title}</h4><p>${scenario.topic}</p>
       <div class="module-progress">
         <p>${done} of ${total} activities complete</p>
@@ -700,12 +764,7 @@ function home() {
   cover.addEventListener('error', () => { cover.hidden = true; });
   workspace.querySelectorAll('[data-open], [data-featured]').forEach(button => button.addEventListener('click', () => {
     const id = Number(button.dataset.open ?? button.dataset.featured);
-    if (id !== nextLab() && !state.runs[id]?.completed) return;
-    if (!state.runs[id]) {
-      state.runs[id] = {stage:0, started:new Date().toISOString(), seen:{}, drafts:{}, audit:[]};
-      save();
-    }
-    open(id);
+    startLab(id);
   }));
 }
 
@@ -753,6 +812,10 @@ function decisionUpdate(decision, entry, board, final = false) {
 function open(id) {
   if (id !== nextLab() && !state.runs[id]?.completed) {
     home();
+    return;
+  }
+  if (!state.runs[id]?.completed && needsReleaseCode(id)) {
+    showReleaseForm(id);
     return;
   }
   const run = state.runs[id];

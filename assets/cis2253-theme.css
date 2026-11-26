@@ -1,0 +1,167 @@
+/* CIS2253 · Cyber Ethics — editorial institutional interface / v1.0
+   Presentation only. Do not modify lab state, release gates, or report logic. */
+:root {
+  --canvas: #f3f5f6;
+  --shell: #ffffff;
+  --surface: #ffffff;
+  --raised: #f0f3f4;
+  --border: #d9e1e5;
+  --text: #182b3b;
+  --muted: #536679;
+  --brand: #165a65;
+  --brand-hover: #104653;
+  --focus: #155c83;
+  --control: #778997;
+  --track: #e1e7ea;
+  --progress-fill: #247479;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(17,35,52,.04), 0 8px 24px rgba(17,35,52,.055);
+}
+body { background: var(--canvas); }
+.mast { background: rgba(255,255,255,.98); border-bottom: 1px solid #d9e1e5; }
+.bar { min-height: 80px; }
+.brand { gap: 12px; color: #102b45; font-weight: 780; letter-spacing: -.025em; }
+.brand .mark {
+  flex: 0 0 42px; width: 42px; height: 42px;
+  border: 1px solid #142f4b; border-radius: 7px;
+  background: #142f4b; color: #d8bd83; font-size: 1.35rem;
+}
+.brand .brand-copy { display:flex; flex-direction:column; gap:1px; font-size:1rem; line-height:1.2; }
+.brand .brand-copy small { font-size:.69rem; font-weight:650; letter-spacing:.075em; text-transform:uppercase; color:#607484; }
+.workspace-menu > summary {
+  background:#f9fbfc; border-color:#d7e0e6;
+  border-radius:7px; min-height:40px; color:#223b50;
+}
+main { padding-top: 32px; }
+.dashboard-intro {
+  display:grid; grid-template-columns: minmax(0, 1fr) minmax(285px, 345px);
+  column-gap:18px; row-gap:18px; margin-bottom: 22px;
+}
+.dashboard-intro .hero { margin:0; }
+.dashboard-title {
+  grid-column: 1 / -1; grid-row:1;
+  position:relative; isolation:isolate; overflow:hidden;
+  display:flex; align-items:center; min-height:330px;
+  padding: clamp(28px, 4.2vw, 56px);
+  border-radius:12px;
+  border:1px solid #28465c;
+  background: linear-gradient(90deg, rgba(10,34,57,.97) 0%, rgba(10,34,57,.94) 31%, rgba(10,34,57,.70) 49%, rgba(10,34,57,.06) 75%),
+              url("photography/cis2253-ethics-hero.webp") center center / cover no-repeat;
+  box-shadow: 0 12px 34px rgba(12,34,52,.10);
+}
+.dashboard-title-copy { position:relative; z-index:1; max-width:620px; }
+.dashboard-title .eyebrow.course-label {
+  display:inline-block; background:transparent; border:0; padding:0;
+  color:#e7c889; font-weight:800; font-size:.76rem; letter-spacing:.15em;
+}
+.dashboard-title h1 {
+  color:#fff; font-size:clamp(2.2rem,4.3vw,3.5rem);
+  letter-spacing:-.04em; line-height:1.07;
+  max-width:570px; margin:14px 0 12px;
+}
+.dashboard-title h1 span {display:block; color:#f7f9fb; font-weight:650;}
+.dashboard-title p.dashboard-deck {
+  max-width:45ch; color:#e2eaf0; font-size:1.03rem;
+  line-height:1.6; margin:0;
+}
+.dashboard-title .hero-topics {
+  display:flex; flex-wrap:wrap; gap:8px; margin-top:22px;
+}
+.hero-topics span {
+  display:inline-block; border:1px solid rgba(225,234,243,.36);
+  background:rgba(17,43,68,.55); color:#f0f4f7;
+  border-radius:4px; font-size:.7rem; font-weight:750;
+  letter-spacing:.055em; padding:6px 9px;
+}
+.dashboard-summary {
+  grid-column:1;grid-row:2; padding:24px 28px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; box-shadow:var(--shadow);
+}
+.dashboard-summary p { color: var(--muted); }
+.dashboard-summary .byline { color:#173450; font-weight:750; margin-bottom:10px; font-size:.9rem; }
+.dashboard-summary .hero-textbook {
+  display:grid; grid-template-columns: auto 1fr;
+  justify-items:start; align-items:center; column-gap:16px;
+  margin-top:18px; padding-top:16px; border-top:1px solid var(--border);
+}
+.dashboard-summary .hero-textbook img { grid-row:span 2; width:64px; max-height:92px; object-fit:contain; border-radius:4px; }
+.dashboard-summary .hero-textbook a { align-self:start; font-size:.86rem; font-weight:720; }
+.hero-resources {
+  grid-column:2;grid-row:2; padding:24px;
+  border-radius:10px; box-shadow:var(--shadow);
+}
+.hero-resources h2 { color:#173450; font-size:1.09rem; padding-bottom:14px; border-bottom:1px solid var(--border); }
+.resource-links { margin-top:12px; gap:8px; }
+.hero-resources .resource-card {
+  position:relative; width:100%; background:#f8fafb;
+  text-align:left; color:#23445b; border:1px solid #dfe6ea;
+  border-radius:6px; padding:12px 34px 12px 12px;
+  min-height:49px; font-weight:670; transition:background .15s,border-color .15s;
+}
+.hero-resources .resource-card::after { content:'↗'; position:absolute; right:12px; top:50%; transform:translateY(-50%); color:#af8c50; font-weight:850; }
+.hero-resources .resource-card:hover { background:#eef4f6; border-color:#aebfc8; text-decoration:none; }
+.featured { border-radius:10px; border-color:var(--border); box-shadow:var(--shadow); padding:26px; gap:24px; }
+.featured h2 { color:#18334c; }
+.featured .eyebrow { color:#597383; }
+.btn { border-radius:6px; min-height:45px; padding:10px 18px; letter-spacing:.005em; box-shadow:none; }
+.btn:hover { box-shadow:0 2px 8px rgba(22,90,101,.14); }
+.progress-summary { background:#f4f7f8; border-color:#dfe7ea; border-radius:8px; }
+.progress-count { color:#1a3d54; }
+.library > h2, .course-reference > h2 { color:#18334c; font-size:1.45rem; }
+.week { margin-top:30px; }
+.week-heading { padding-bottom:11px; margin-bottom:12px; border-bottom:1px solid #dbe2e6; }
+.week-heading .eyebrow {
+  background:#e9eff1; border:1px solid #d6e1e5; border-radius:4px;
+  padding:4px 9px; color:#2d5a66; font-size:.73rem;
+}
+.week-heading h3 { color:#1a344b; font-size:1.02rem; }
+.grid { gap:17px; }
+.card {
+  border:1px solid #dae3e7; border-radius:10px; padding:18px;
+  background:#fff; gap:10px; box-shadow:0 3px 14px rgba(14,39,58,.04);
+  transition:box-shadow .18s,border-color .18s,transform .18s;
+}
+.card:hover,.card:focus-within {
+  border-color:#a8bec5; box-shadow:0 10px 28px rgba(15,42,61,.09);
+  transform:translateY(-1px);
+}
+.card .case-thumbnail { border-radius:6px; margin-bottom:5px; }
+.card .eyebrow { color:#487180; font-size:.7rem; letter-spacing:.08em; }
+.card h4 { color:#153349; font-size:1.09rem; }
+.card .text-link { font-weight:750; color:#145d67; padding:5px 0; }
+.module-progress { margin-top:auto; padding-top:14px; border-top:1px solid #e7ecee; }
+.panel, .featured { border-color:#dbe3e7; }
+.panel { border-radius:10px; }
+.case-heading h1 { color:#16334d; }
+.activity { box-shadow:var(--shadow); border-left:3px solid #b59357; }
+.choice { border-radius:7px; min-height:48px; align-items:center; }
+.choice:has(:checked) { border-color:#2c7d85; background:#e8f3f4; }
+input:not([type=radio]),textarea,.library-filters select,.source-notes select { border-radius:6px; background:#fff; }
+.resource-entry { background:#fff; border:1px solid var(--border); border-radius:8px; }
+.report-banner { background:#112b4a; }
+.report { border:1px solid #e1e5e9; box-shadow:0 8px 30px rgba(14,39,58,.08); }
+@media (max-width:760px) {
+  .dashboard-intro { grid-template-columns:1fr; gap:14px; }
+  .dashboard-title { grid-column:1; grid-row:1; min-height:315px; padding:27px; background-position:57% center; }
+  .dashboard-summary { grid-column:1; grid-row:2; padding:22px; }
+  .hero-resources {grid-column:1;grid-row:3; margin:0; padding:22px;}
+  .dashboard-title h1 { font-size:clamp(2rem,7.3vw,2.8rem); }
+}
+@media (max-width:520px) {
+  .bar { min-height:69px; }
+  .brand .brand-copy {font-size:.88rem;}
+  .brand .brand-copy small {font-size:.57rem;}
+  .brand .mark {width:36px;height:36px;flex-basis:36px;}
+  .dashboard-title { min-height:345px; padding:23px; background-image:linear-gradient(90deg,rgba(10,34,57,.98),rgba(10,34,57,.85) 68%,rgba(10,34,57,.35)),url("photography/cis2253-ethics-hero.webp"); background-position:53% center; }
+  .hero-topics span {font-size:.64rem;}
+  .dashboard-title p.dashboard-deck {font-size:.94rem;}
+  .featured { padding:20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card {transform:none!important;}
+}
+@media print {
+  .mast,.dashboard-intro,.featured,.library,.course-reference { display:none!important; }
+  .report { box-shadow:none; border:0; }
+}

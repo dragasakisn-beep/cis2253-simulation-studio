@@ -6,7 +6,7 @@ const load = p => readFileSync(new URL('../'+p, import.meta.url));
 const html = load('index.html').toString('utf8');
 const css = load('assets/cis2253-theme.css').toString('utf8');
 const hero = load('assets/photography/cis2253-ethics-hero.webp');
-const js = html.split('<script>')[1]?.split('</script>')[0];
+const js = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).join('\n');
 test('approved new banner is installed without changing scenario artwork',()=>{
  assert.ok(html.includes('assets/cis2253-theme.css?v=1.0.0'));
  assert.ok(css.includes('photography/cis2253-ethics-hero.webp'));
